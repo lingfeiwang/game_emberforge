@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Emberforge Depths</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-act="act1">
+<div id="embers"></div>
+<div id="app">
+
+  <div id="topbar">
+    <span class="stat logo">🔥 EMBERFORGE</span>
+    <span class="stat" id="char-icon"></span>
+    <span class="stat">❤️ <span id="hp-text">—</span>
+      <span id="hpbar"><span id="hpfill"></span></span></span>
+    <span class="stat gold">🪙 <b id="gold-text">0</b></span>
+    <span class="stat">🏔 <b id="floor-text">—</b></span>
+    <span class="stat" id="asc-text"></span>
+    <span class="stat clickable" id="deck-btn" data-tt="View your deck (D)">🃏 <b id="deck-count">0</b></span>
+    <span id="potionbar"></span>
+    <span id="relicbar"></span>
+    <span class="stat clickable" id="settings-btn" data-tt="Settings">⚙️</span>
+  </div>
+
+  <!-- TITLE -->
+  <div id="screen-title" class="screen active">
+    <div id="title-hero">
+      <h1>EMBERFORGE<br>DEPTHS</h1>
+      <p class="tagline-main">A roguelike deckbuilder in three acts.<br>Descend the dead forge. Master the Heat. Slay what beats at its heart.</p>
+    </div>
+    <div id="title-menu">
+      <button class="primary big" id="continue-btn" style="display:none" onclick="continueRun()">▶ &nbsp;CONTINUE</button>
+      <button class="primary big" onclick="openCharSelect()">⚒ &nbsp;NEW DESCENT</button>
+      <button class="big" onclick="startDaily()">📅 &nbsp;DAILY CLIMB<br><span class="dim small" id="daily-sub"></span></button>
+      <div id="title-row2">
+        <button onclick="openCollection()">📖 Collection</button>
+        <button onclick="openStats()">📊 Statistics</button>
+        <button onclick="openSettings()">⚙️ Settings</button>
+        <button onclick="openHowTo()">📜 How to Play</button>
+      </div>
+    </div>
+    <div id="title-footer" class="dim small">v1.0.1 · three characters · ten ascensions · daily climbs</div>
+  </div>
+
+  <!-- CHARACTER SELECT -->
+  <div id="screen-charselect" class="screen">
+    <h2>Choose your descent</h2>
+    <div id="char-cards"></div>
+    <div id="run-config">
+      <div class="run-config-block">
+        <div class="rc-label">ASCENSION</div>
+        <div class="asc-stepper">
+          <button id="asc-minus" onclick="ascAdjust(-1)">−</button>
+          <span id="asc-val">0</span>
+          <button id="asc-plus" onclick="ascAdjust(1)">+</button>
+        </div>
+        <div id="asc-desc" class="dim small"></div>
+      </div>
+      <div class="run-config-block">
+        <div class="rc-label">SEED <span class="dim small">(optional)</span></div>
+        <input type="text" id="seed-input" placeholder="random" maxlength="24" spellcheck="false">
+        <div class="dim small">Same seed = same map, enemies &amp; rewards.</div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:18px">
+      <button class="primary big" onclick="embark()">⚒ &nbsp;BEGIN THE DESCENT&nbsp; ⚒</button>
+      <br><br><button onclick="showTitle()">← Back</button>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div id="screen-map" class="screen">
+    <h2 id="map-act-title">Act I</h2>
+    <p class="sub">Choose a lit node to travel. Paths only lead upward. <span id="map-legend"></span></p>
+    <div id="map-wrap"></div>
+    <p class="dim small" id="map-seed"></p>
+  </div>
+
+  <!-- COMBAT -->
+  <div id="screen-combat" class="screen">
+    <div id="battlefield">
+      <div id="player-side">
+        <div class="intent" style="visibility:hidden">·</div>
+        <div id="player-avatar" class="sprite">🤖</div>
+        <div class="ename" id="player-name">The Forgeborn</div>
+        <div class="ehp-num" id="player-hp-small">—</div>
+        <div class="pblock-chip">🛡 <b id="player-block">0</b></div>
+        <div class="stags" id="player-status"></div>
+        <div id="servo-row" style="display:none"></div>
+      </div>
+      <div id="enemy-zone"></div>
+    </div>
+    <div id="midbar">
+      <div id="heat-wrap">
+        <div id="heat-gauge"></div>
+        <div id="heat-label"><b id="heat-num">0</b>/<span id="cap-num">9</span> Heat</div>
+      </div>
+      <div id="chain-label" data-tt="Play a card sharing this tag to trigger its <b>Chain</b> bonus">⛓ <b id="chain-tag">—</b></div>
+      <div id="piles">
+        <span class="clickable" id="pile-draw-btn" data-tt="View draw pile (order hidden)">Draw <b id="pile-draw">0</b></span> ·
+        <span class="clickable" id="pile-discard-btn" data-tt="View discard pile">Discard <b id="pile-discard">0</b></span> ·
+        <span class="clickable" id="pile-exhaust-btn" data-tt="View exhausted cards">Exhaust <b id="pile-exhaust">0</b></span>
+      </div>
+      <button class="primary" id="end-turn-btn" data-tt="End your turn (E)" onclick="endTurn()">End Turn ⏵</button>
+    </div>
+    <div id="hand"></div>
+    <div id="combat-controls"><span id="target-hint"></span></div>
+    <div id="log"></div>
+  </div>
+
+  <!-- REST -->
+  <div id="screen-rest" class="screen">
+    <h2>🛏️ Cooling Chamber</h2>
+    <p class="sub">The hiss of old coolant pipes. A moment of peace in the deep.</p>
+    <div class="choices">
+      <div class="room-card" onclick="restHeal()"><div class="icon">❤️‍🩹</div><div class="rname">Rest</div><div class="rdesc" id="rest-desc">Heal 30% of Max HP</div></div>
+      <div class="room-card" onclick="restSmith()"><div class="icon">🔨</div><div class="rname">Smith</div><div class="rdesc">Upgrade a card permanently</div></div>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div id="screen-shop" class="screen">
+    <h2>🛒 The Rustmonger</h2>
+    <p class="sub">"Everything's for sale, sparkling. Even the things that scream."</p>
+    <div id="shop-items"></div>
+    <div style="text-align:center; margin-top:14px"><button class="primary" onclick="resumeMap()">Leave shop</button></div>
+  </div>
+
+  <!-- EVENT -->
+  <div id="screen-event" class="screen">
+    <div class="event-box">
+      <div class="bigicon" id="event-icon">❓</div>
+      <h2 id="event-title">Event</h2>
+      <p id="event-text" class="event-flavor"></p>
+      <div id="event-choices"></div>
+    </div>
+  </div>
+
+  <!-- GAME OVER / WIN -->
+  <div id="screen-gameover" class="screen center-screen">
+    <h1 class="death">YOU HAVE GONE COLD</h1>
+    <p class="sub" id="death-text"></p>
+    <div id="death-stats"></div>
+    <button class="primary big" onclick="openCharSelect()">Forge Anew</button>
+    <button class="big" onclick="showTitle()">Title</button>
+  </div>
+  <div id="screen-win" class="screen center-screen">
+    <h1 class="victory">THE FORGE IS YOURS</h1>
+    <p class="sub">The fire at the heart of the world gutters and dies. In the silence, ten thousand cold anvils wait for a new master.<br>You climb to the surface, trailing sparks like a comet.</p>
+    <div id="win-stats"></div>
+    <p class="gold" id="win-next"></p>
+    <button class="primary big" onclick="openCharSelect()">Descend Again</button>
+    <button class="big" onclick="showTitle()">Title</button>
+  </div>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="overlay"><div class="panel" id="overlay-panel"></div></div>
+</div>
+
+<!-- floating chrome -->
+<div id="turn-banner"></div>
+<div id="boss-banner"></div>
+<div id="tooltip"></div>
+<div id="toasts"></div>
+
+<script src="js/util.js"></script>
+<script src="js/meta.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/relics.js"></script>
+<script src="js/enemies.js"></script>
+<script src="js/events.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/map.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

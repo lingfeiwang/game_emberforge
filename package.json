@@ -1,0 +1,61 @@
+{
+  "name": "emberforge-depths",
+  "productName": "Emberforge Depths",
+  "version": "1.0.1",
+  "description": "A roguelike deckbuilder in three acts. Descend the dead forge, master the Heat, slay what beats at its heart.",
+  "main": "electron/main.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "dist:mac": "electron-builder --mac",
+    "test": "node tests/smoke.mjs && node tests/unit.mjs && node tests/burnspread.mjs",
+    "test:fuzz": "node tests/autoplay2.mjs forgeborn CI-1 0 --reload && node tests/autoplay2.mjs cinderwitch CI-2 0 --reload && node tests/autoplay2.mjs scrapwright CI-3 0 --reload"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "jsdom": "^29.0.0"
+  },
+  "build": {
+    "appId": "com.emberforge.depths",
+    "productName": "Emberforge Depths",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "style.css",
+      "js/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "zip"
+      ],
+      "category": "Game"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.games"
+    }
+  },
+  "author": "Emberforge Team",
+  "optionalDependencies": {
+    "dmg-license": "^1.0.11"
+  }
+}
